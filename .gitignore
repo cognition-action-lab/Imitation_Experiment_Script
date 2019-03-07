@@ -1,0 +1,15 @@
+Debug/*
+!Debug/*.dll
+!Debug/plugins/*
+ipch/
+Resources/from_Austin/*
+Resources/IM_Images/*
+Resources/*.xlsx
+main_*
+Data/
+*.dat
+*.sdf
+*.suo
+*.user
+*.opensdf
+*log.txt
