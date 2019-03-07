@@ -100,10 +100,28 @@ Video::Video(const char* fname, int x, int y, int w, int h, int* errorcode) //SD
 
 	isValid = 1;
 
-    // If you don't have this variable set you must have plugins directory
-    // with the executable or libvlc_new() will not work!
-	_putenv("VLC_PLUGIN_PATH=C:\\Users\\Coda\\Documents\\cpp code\\vlctest\\vlc-3.0.6\\plugins");
-    printf("VLC_PLUGIN_PATH=%s\n", getenv("VLC_PLUGIN_PATH"));
+	//we need absolute paths, so we must figure out the project directory
+	char *bpath = SDL_GetBasePath();
+	std::string basepath;
+	basepath.assign(bpath);
+	//std::cerr << "BasePath: " << basepath.c_str() << std::endl;
+	basepath.erase(basepath.rfind("\\"),1); //get rid of the last slash in the path
+	basepath.erase(basepath.rfind("\\")+1,10); //get rid of the "Debug" folder name to get to the project folder
+	//std::cerr << "ModBasePath: " << basepath.c_str() << std::endl;
+
+
+    //Set the environmental variable to point to the VLC plugins directory
+    //   If this isn't set properly, libvlc_new() will not work!
+	//NOTE: Sometimes VLC still won't initialize even with this workaround; if libvlc_new() returns NULL,
+	//      just drop a copy of the VLC plugins folder into the Debug folder.
+	std::string envpathcmd;
+	envpathcmd.assign("VLC_PLUGIN_PATH=");
+	envpathcmd.append(basepath.c_str());
+	envpathcmd.append("vlc-3.0.6\\plugins");
+	_putenv(envpathcmd.c_str());
+	std::cerr << "VLC_PLUGIN_PATH=" << getenv("VLC_PLUGIN_PATH") << std::endl;	
+    //printf("VLC_PLUGIN_PATH=%s\n", getenv("VLC_PLUGIN_PATH"));
+
 
 	//we will set up a dedicated window and renderer for the video, as it plays asynchronously
 	context.window = SDL_CreateWindow(
@@ -184,14 +202,6 @@ Video::Video(const char* fname, int x, int y, int w, int h, int* errorcode) //SD
 
 	//set up the video file to be played
 	//libVLC wants an absolute path, so we will figure out the project directory
-	char *bpath = SDL_GetBasePath();
-	std::string basepath;
-	basepath.assign(bpath);
-	//std::cerr << "BasePath: " << basepath.c_str() << std::endl;
-	basepath.erase(basepath.rfind("\\"),1); //get rid of the last slash in the path
-	basepath.erase(basepath.rfind("\\")+1,10); //get rid of the "Debug" folder name to get to the project folder
-	//std::cerr << "ModBasePath: " << basepath.c_str() << std::endl;
-
 	std::stringstream vidpath;
 	int d = 0;
 	vidpath << basepath.c_str() << VIDEOPATH << fname; //"\\Video" << d << ".divx";
