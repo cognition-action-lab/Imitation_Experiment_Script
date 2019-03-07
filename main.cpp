@@ -20,7 +20,7 @@
 #include "Sound.h"
 #include "Timer.h"
 #include "Image.h"
-#include "vlcVideoPlayer.h"
+#include "vlcVideoPlayerSM.h"
 
 #include "config.h"
 
@@ -88,7 +88,7 @@ Timer* hoverTimer;
 Timer* movTimer;
 
 //videos
-Video *Vid;
+Video *Vid = NULL;
 int NVid;
 std::string vpathbase;
 int textcontext; //flag to also create/show text along with audio context
@@ -161,7 +161,7 @@ int LoadTrFile(char *filename);
 int LoadContextFile(char *fname,Image* cText[]);
 // Update loop (state machine)
 void game_update();
-int VidLoad();
+int VidLoad(const char* fname);
 
 
 bool quit = false;  //flag to cue exit of program
@@ -449,22 +449,23 @@ int LoadContextFile(char *fname,Image* cText[])
 }
 
 
-int VidLoad()
+int VidLoad(const char* fname)
 {
 
 	//call to (re)load a new video
 
-	if (Vid->IsValid())
-		Vid->CleanUp();
+	//if (Vid->IsValid())
+		//Vid->CleanUp();
 
-	std::stringstream vidfile;
 	int errcode;
 
-	vidfile.str(std::string());
-	NVid = curtr.item-1;
-	vidfile << vpathbase.c_str() <<  "Video" << NVid << ".divx";
 	//std::cerr << "VIdPath: " << vidfile.str().c_str();
-	Vid = new Video(vidfile.str().c_str(),SCREEN_WIDTH/2,SCREEN_HEIGHT/2,VIDEO_WIDTH,VIDEO_HEIGHT,&errcode);
+	//Vid = new Video(vidfile.str().c_str(),SCREEN_WIDTH/2,SCREEN_HEIGHT/2,VIDEO_WIDTH,VIDEO_HEIGHT,&errcode);
+	if (Vid == NULL)
+		Vid = new Video(fname,SCREEN_WIDTH/2,SCREEN_HEIGHT/2,VIDEO_WIDTH,VIDEO_HEIGHT,&errcode);
+	else
+		errcode = Vid->LoadNewVid(fname);
+
 	if (errcode != 0)
 	{
 		std::cerr << "Video " << NVid << " did not load." << std::endl;
@@ -652,68 +653,10 @@ bool init()
 		}
 	}
 	
-	/*
 	//initialize the video player and the video file
 	// Trial type (Mless: 1 = Mless, 2 = MlessAwkward, 3 = MlessStatic; 
 	//              Mful: 4 = Mful,  5 = MfulAwkward,  6 = MfulStatic,   7 = Named Mful (same path as 4))
 	//               (note, Mful=4 with context set to 1 is Named Mful but the instructions will be wrong! Use Mful=7 for named Mful)
-	std::string vpathbase;
-	switch(trtbl[0].trialType) //assume this is blocked; we have to call trial 0 since CurTrial is initialized to -1
-		{
-			case 1:
-				vpathbase.assign(VPATH0);
-				NVids = NVIDEOS0;
-				break;
-			case 2:
-				vpathbase.assign(VPATH1);
-				NVids = NVIDEOS1;
-				break;
-			case 3:
-				vpathbase.assign(VPATH2);
-				NVids = NVIDEOS2;
-				break;
-			case 4:
-			case 7:
-				vpathbase.assign(VPATH3);
-				NVids = NVIDEOS3;
-				break;
-			case 5: 
-				vpathbase.assign(VPATH4);
-				NVids = NVIDEOS4;
-				break;
-			case 6: 
-				vpathbase.assign(VPATH5);
-				NVids = NVIDEOS5;
-				break;
-			default:
-				vpathbase.assign("");
-				NVids = 0;
-		}
-
-
-	std::stringstream vidfile;
-	int errcode;
-	for (a = 0; a < NVids; a++)
-	{
-		vidfile.str(std::string());
-		vidfile << vpathbase.c_str() <<  "Video" << a << ".divx";
-		Vid[a] = new Video(vidfile.str().c_str(),SCREEN_WIDTH/2,SCREEN_HEIGHT/2,VIDEO_WIDTH,VIDEO_HEIGHT,&errcode);
-		if (errcode != 0)
-		{
-			std::cerr << "Video " << a << " did not load." << std::endl;
-			Vid[a]->SetValidStatus(0);
-		}		
-		else
-		{
-			std::cerr << "   Video " << a << " loaded." << std::endl;
-			std::cerr << "      Vid_size: " << VIDEO_WIDTH << "x" << VIDEO_HEIGHT << std::endl;
-			//Vid[a]->SetValidStatus(1);
-			//Vid[a]->SetPos(SCREEN_WIDTH/2,SCREEN_HEIGHT/2);
-
-		}
-			
-	}
-	*/
 	switch(trtbl[0].trialType) //assume this is blocked; we have to call trial 0 since CurTrial is initialized to -1
 		{
 			case 1:
@@ -740,11 +683,11 @@ bool init()
 		}
 
 	std::stringstream vidfile;
-	int errcode;
-
 	vidfile.str(std::string());
 	NVid = trtbl[0].item-1;
 	vidfile << vpathbase.c_str() <<  "Video" << NVid << ".divx";
+	VidLoad(vidfile.str().c_str());
+	/*
 	Vid = new Video(vidfile.str().c_str(),SCREEN_WIDTH/2,SCREEN_HEIGHT/2,VIDEO_WIDTH,VIDEO_HEIGHT,&errcode);
 	if (errcode != 0)
 	{
@@ -759,7 +702,7 @@ bool init()
 		//Vid[a]->SetValidStatus(1);
 		//Vid[a]->SetPos(SCREEN_WIDTH/2,SCREEN_HEIGHT/2);
 	}
-
+	*/
 
 	textcontext = trtbl[0].showcontext;  //if this is -1, do nothing; if this is 0, read a number; if this is >0, show context of specified type
 	/*
@@ -1059,6 +1002,7 @@ static void draw_screen()
 
 	player->Draw();
 
+	Vid->Update();
 
 	// Draw text
 	endtext->Draw(float(PHYSICAL_WIDTH)/2.0f,float(PHYSICAL_HEIGHT)*2.0f/3.0f);
@@ -1148,8 +1092,9 @@ void game_update()
 		for (int b = 0; b < 2; b++)
 			for (int a = 0; a < NINSTRUCT; a++)
 				instructimages[b][a]->Off();
-
-		Vid->Invisible();
+		
+		if (Vid->VisibleState() != 0)
+			Vid->Invisible();
 
 		if( returntostart && nextstateflag)  //hand is in the home position and the experimenter asked to advance the experiment
 		{
@@ -1188,7 +1133,6 @@ void game_update()
 
 			//make sure that all the videos have stopped playing and are invisible
 			Vid->Stop();
-			Vid->Invisible();
 			Vid->ResetVid();
 
 
@@ -1279,7 +1223,11 @@ void game_update()
 			}
 			else
 			{
-				VidLoad();
+				std::stringstream vidfile;
+				vidfile.str(std::string());
+				NVid = curtr.item-1;
+				vidfile << vpathbase.c_str() <<  "Video" << NVid << ".divx";
+				VidLoad(vidfile.str().c_str());
 			}
 
 			Target.vidstatus = 0;
@@ -1378,7 +1326,7 @@ void game_update()
 				else 
 				{
 					//no context requested, skip directly to show video state
-					Vid->Visible();
+					Vid->Play();
 					Target.vidstatus = 1;
 					
 				}
@@ -1393,7 +1341,7 @@ void game_update()
 	case ShowContext:
 
 		//check if the hand moves too early; if so, reset the trial
-		if (player->Distance(startCircle) > START_RADIUS)
+		if (!mvtStarted && player->Distance(startCircle) > START_RADIUS)
 		{	//detected movement too early; 
 			//std::cerr << "Player: " << player->GetX() << " , " << player->GetY() << " , " << player->GetZ() << std::endl;
 			//std::cerr << "Circle: " << startCircle->GetX() << " , " << startCircle->GetY() << " , " << startCircle->GetZ() << std::endl;
@@ -1405,7 +1353,7 @@ void game_update()
 			holdtext->On();
 			hoverTimer->Reset();
 
-			Vid->Pause();  //just in case we played the video with the context
+			Vid->Stop();  //just in case we played the video with the context
 			Vid->Invisible();
 			Target.vidstatus = 0;
 		}
@@ -1417,7 +1365,6 @@ void game_update()
 			if ((curtr.showcontext > 0) && (curtr.context-1 < NcontextTexts))
 				contextText[curtr.context-1]->Off();
 			Vid->ResetVid();
-			Vid->Invisible();
 			Target.vidstatus = 0;
 
 			returntext->On();
@@ -1438,10 +1385,6 @@ void game_update()
 			state = WaitStim;
 			std::cerr << "False start; returning to WAITSTIM state." << std::endl;
 		}
-
-		//if none of the above, reassert play
-		//if (Target.vidstatus == 1 && !Vid->HasStarted() && !Vid->HasEnded())
-		//	Vid->Play();
 
 		
 		if (!donePlayingContext && (itemsounds[curtr.context-1]->IsPlaying() == 0))
@@ -1492,7 +1435,7 @@ void game_update()
 			mvtStarted = true;
 			if ((curtr.showcontext > 0) && (curtr.context-1 < NcontextTexts))
 				contextText[curtr.context-1]->Off();
-			Vid->Pause();
+			Vid->Stop();
 			Vid->Invisible();
 			Target.vidstatus = 0;
 			//items[curtr.context-1]->Off();
@@ -1507,7 +1450,6 @@ void game_update()
 			if ((curtr.showcontext > 0) && (curtr.context-1 < NcontextTexts))
 				contextText[curtr.context-1]->Off();
 			Vid->ResetVid();
-			Vid->Invisible();
 			Target.vidstatus = 0;
 			returntext->On();
 			nextstateflag = false;
@@ -1528,7 +1470,7 @@ void game_update()
 			std::cerr << "False start; returning to WAITSTIM state." << std::endl;
 		}
 
-		if (!vidEnded && Vid->HasEnded())
+		if (!vidEnded && (Vid->HasEnded() == 1))
 		{
 			vidEnded = true;
 			hoverTimer->Reset();
@@ -1544,7 +1486,6 @@ void game_update()
 			Target.vidstatus = 2;
 			Vid->Stop();
 			Vid->ResetVid();
-			Vid->Invisible();
 			//VidLoad();
 			//Vid->Invisible();
 			
@@ -1558,10 +1499,6 @@ void game_update()
 		}
 
 		
-		//if none of the above, reasset play
-		//if (Target.vidstatus == 1 && !vidEnded && !Vid->HasStarted() && !Vid->HasEnded())
-		//	Vid->Play();
-
 		//if video finished playing and we are ready to move on...
 		if (!mvtStarted && vidEndedAck && (trialTimer->Elapsed() > curtr.srdur) )  //prompt start signal
 		{
@@ -1578,7 +1515,6 @@ void game_update()
 			//recordtext->On();
 
 			//we will replay the video now so people can imitate during the second video play.
-			Vid->Visible();
 			Vid->Play();
 			Target.vidstatus = 1;
 
@@ -1646,7 +1582,6 @@ void game_update()
 
 			Vid->Pause();
 			Vid->ResetVid();
-			Vid->Invisible();
 			Target.vidstatus = 0;
 
 			returntostart = false;
@@ -1683,9 +1618,8 @@ void game_update()
 		{
 			returntext->Off();
 				
-			//make sure that all the videos have stopped playing and are invisible
+			//make sure that all the videos have stopped playing and are reset (reset also makes them invisible)
 			Vid->Stop();
-			Vid->Invisible();
 			Vid->ResetVid();
 
 
