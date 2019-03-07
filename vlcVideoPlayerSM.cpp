@@ -248,10 +248,6 @@ Video::Video(const char* fname, int x, int y, int w, int h, int* errorcode) //SD
 	ResetStatus();
 	GetStatus();
 
-	context.showVideo = 0;
-	
-	isVisible = 0;
-
 	Invisible();  //make the window invisible until we need it
 
 	std::cerr << "Video: " << vidpath.str().c_str() << " load complete: status = " << *errorcode << "." << std::endl;
@@ -308,7 +304,6 @@ int Video::Update()
 			if (requestplay == 1)
 			{
 				//request to play has come in; try to play
-				context.showVideo = 1;
 				if (isVisible == 0)
 					Visible();
 				
@@ -375,6 +370,7 @@ int Video::Update()
 			//if we haven't transitioned states, check if there are any transition requests
 			if (requestpause == 1)
 			{
+				std::cerr << ">>VidPlay state: Pause requested." << std::endl;
 				libvlc_media_player_pause(mp);
 
 				requestpause = 2;
@@ -392,7 +388,7 @@ int Video::Update()
 		case Paused:
 
 			requestpause = 0;
-
+			
 			//see if the state has changed; if so, obey this transition
 			if (mpstate == libvlc_Stopped)
 			{
@@ -414,7 +410,6 @@ int Video::Update()
 			if (requestplay == 1)
 			{
 				//request to play has come in; try to play
-				context.showVideo = 1;
 				if (isVisible == 0)
 					Visible();
 				
@@ -462,7 +457,6 @@ int Video::Update()
 			if (requestplay==1)
 			{
 				//request to play has come in; try to play
-				context.showVideo = 1;
 				if (isVisible == 0)
 					Visible();
 				
@@ -514,7 +508,6 @@ int Video::Update()
 
 			if (isVisible == 1)
 				Invisible();
-			context.showVideo = 0;
 
 			//to rewind we need to be in play state
 			if (requestrewind == 1)
@@ -903,8 +896,6 @@ int Video::VidLoad(const char* fname)
 	ResetStatus();
 	GetStatus();
 
-	context.showVideo = 0;
-	
 	Invisible();  //make the window invisible until we need it
 
 	return(0);
@@ -939,6 +930,7 @@ void Video::Visible()
 		std::cerr << ">Vid window is visible." << std::endl;
 		visTime = SDL_GetTicks();
 		isVisible = 1;
+		context.showVideo = 1;  //allow request to actually render video
 	}
 	
 }
@@ -953,6 +945,7 @@ void Video::Invisible()
 	{
 		std::cerr << ">Vid window is hidden." << std::endl;
 		isVisible = 0;
+		context.showVideo = 0;  //shut off request to actually render video
 	}
 	
 }
