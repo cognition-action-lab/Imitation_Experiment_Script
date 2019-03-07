@@ -94,7 +94,7 @@
     <ClInclude Include="TargetFrame.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TrackBird.h" />
-    <ClInclude Include="vlcVideoPlayerSM.h" />
+    <ClInclude Include="vlcVideoPlayer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Circle.cpp" />
@@ -110,7 +110,7 @@
     <ClCompile Include="SpeedBar.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TrackBird.cpp" />
-    <ClCompile Include="vlcVideoPlayerSM.cpp" />
+    <ClCompile Include="vlcVideoPlayer.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
