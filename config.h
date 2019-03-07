@@ -12,7 +12,7 @@
 #define SUBJECT_ID "2"
 
 //define the file that contains the name of the trial table
-#define TRIALFILE "./TrialTables/Named_Mful.txt"  
+#define TRIALFILE "./TrialTables/Static_Mful.txt"  
 
 //define the folder where the data will go (this folder must exist!)
 #define DATAPATH "C:/Users/MRRI/Desktop/imitation_data/"
@@ -80,10 +80,10 @@
 
 //screen dimensions
 //   (note, the Elitebook wants dimensions that are slightly larger than the screen, with WINDOWED set to true!)
-//#define SCREEN_WIDTH  1602
-//#define SCREEN_HEIGHT  901
-#define SCREEN_WIDTH  1440
-#define SCREEN_HEIGHT  900
+#define SCREEN_WIDTH  1602
+#define SCREEN_HEIGHT  901
+//#define SCREEN_WIDTH  1440
+//#define SCREEN_HEIGHT  900
 
 //video dimensions
 //Videos are in 16:9 format

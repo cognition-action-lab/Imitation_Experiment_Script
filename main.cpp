@@ -20,7 +20,7 @@
 #include "Sound.h"
 #include "Timer.h"
 #include "Image.h"
-#include "vlcVideoPlayerSM.h"
+#include "vlcVideoPlayer.h"
 
 #include "config.h"
 
@@ -1059,7 +1059,6 @@ static void draw_screen()
 
 	player->Draw();
 
-	Vid->Update();
 
 	// Draw text
 	endtext->Draw(float(PHYSICAL_WIDTH)/2.0f,float(PHYSICAL_HEIGHT)*2.0f/3.0f);
@@ -1149,9 +1148,8 @@ void game_update()
 		for (int b = 0; b < 2; b++)
 			for (int a = 0; a < NINSTRUCT; a++)
 				instructimages[b][a]->Off();
-		
-		if (Vid->VisibleState() != 0)
-			Vid->Invisible();
+
+		Vid->Invisible();
 
 		if( returntostart && nextstateflag)  //hand is in the home position and the experimenter asked to advance the experiment
 		{
@@ -1395,7 +1393,7 @@ void game_update()
 	case ShowContext:
 
 		//check if the hand moves too early; if so, reset the trial
-		if (!mvtStarted && player->Distance(startCircle) > START_RADIUS)
+		if (player->Distance(startCircle) > START_RADIUS)
 		{	//detected movement too early; 
 			//std::cerr << "Player: " << player->GetX() << " , " << player->GetY() << " , " << player->GetZ() << std::endl;
 			//std::cerr << "Circle: " << startCircle->GetX() << " , " << startCircle->GetY() << " , " << startCircle->GetZ() << std::endl;
@@ -1440,6 +1438,10 @@ void game_update()
 			state = WaitStim;
 			std::cerr << "False start; returning to WAITSTIM state." << std::endl;
 		}
+
+		//if none of the above, reassert play
+		//if (Target.vidstatus == 1 && !Vid->HasStarted() && !Vid->HasEnded())
+		//	Vid->Play();
 
 		
 		if (!donePlayingContext && (itemsounds[curtr.context-1]->IsPlaying() == 0))
@@ -1491,7 +1493,6 @@ void game_update()
 			if ((curtr.showcontext > 0) && (curtr.context-1 < NcontextTexts))
 				contextText[curtr.context-1]->Off();
 			Vid->Pause();
-			//Vid->Stop();
 			Vid->Invisible();
 			Target.vidstatus = 0;
 			//items[curtr.context-1]->Off();
@@ -1527,7 +1528,7 @@ void game_update()
 			std::cerr << "False start; returning to WAITSTIM state." << std::endl;
 		}
 
-		if (!vidEnded && (Vid->HasEnded() == 1))
+		if (!vidEnded && Vid->HasEnded())
 		{
 			vidEnded = true;
 			hoverTimer->Reset();
@@ -1557,6 +1558,10 @@ void game_update()
 		}
 
 		
+		//if none of the above, reasset play
+		//if (Target.vidstatus == 1 && !vidEnded && !Vid->HasStarted() && !Vid->HasEnded())
+		//	Vid->Play();
+
 		//if video finished playing and we are ready to move on...
 		if (!mvtStarted && vidEndedAck && (trialTimer->Elapsed() > curtr.srdur) )  //prompt start signal
 		{
