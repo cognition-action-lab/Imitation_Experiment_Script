@@ -12,7 +12,7 @@
 #define SUBJECT_ID "2"
 
 //define the file that contains the name of the trial table
-#define TRIALFILE "./TrialTables/Static_Mful.txt"  
+#define TRIALFILE "./TrialTables/freestream.txt"  
 
 //define the folder where the data will go (this folder must exist!)
 #define DATAPATH "C:/Users/MRRI/Desktop/imitation_data/"
@@ -64,7 +64,7 @@
 //tracker configuration parameters
 //TRACKTYPE: type of tracker being used: FOB (0) or trakStar (1)
 #define TRACKTYPE 1
-#define BIRDCOUNT 8
+#define BIRDCOUNT 8  //NOTE: THIS MUST REFLECT NUMBER OF VALID TRACKERS!
 //SAMPRATE: sampling rate (for 1 full measurement cycle, or time to activate all 3 axes.  for trakSTAR, we get samples returned at SAMPRATE*3 frequency.
 #define SAMPRATE 140
 //1 out of every REPORTRATE samples will be acquired from the trakSTAR, when in Synchronous mode
@@ -75,7 +75,7 @@
 #define HEMIFIELD FRONT
 #define RANGE 72.0f
 #define DOSYNC true
-#define DOMETRIC true
+#define DOMETRIC false
 
 
 //screen dimensions

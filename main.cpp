@@ -201,6 +201,7 @@ int main(int argc, char* args[])
 		if (trackstatus>0)
 		{
 			// Update inputs from Flock of Birds
+			//std::cerr << "Check FOB" << std::endl;
 			inputs_updated = TrackBird::GetUpdatedSample(&sysconfig,dataframe);
 		}
 
@@ -280,6 +281,7 @@ int main(int argc, char* args[])
 		// Get data from input devices
 		if (inputs_updated > 0) // if there is a new frame of data
 		{
+			//std::cerr << "InputsUpdated" << std::endl;
 
 			//updatedisplay = true;
 			for (int a = ((trackstatus>0) ? 1 : 0); a <= ((trackstatus>0) ? BIRDCOUNT : 0); a++)
@@ -293,7 +295,10 @@ int main(int argc, char* args[])
 					//std::cerr << "Data" << a << ": " << dataframe[a].x << " , " << dataframe[a].y << " , " << dataframe[a].z << std::endl;
 
 					if (recordData)  //only write out if we need to
+					{
 						writer->Record(a, dataframe[a], Target);
+						//std::cerr << "Data Frame written." << std::endl;
+					}
 					else
 						Target.starttime = dataframe[a].time;
 				}
@@ -659,6 +664,9 @@ bool init()
 	//               (note, Mful=4 with context set to 1 is Named Mful but the instructions will be wrong! Use Mful=7 for named Mful)
 	switch(trtbl[0].trialType) //assume this is blocked; we have to call trial 0 since CurTrial is initialized to -1
 		{
+			case 0:
+				vpathbase.assign("");
+				break;
 			case 1:
 				vpathbase.assign(VPATH0);
 				break;
@@ -686,7 +694,8 @@ bool init()
 	vidfile.str(std::string());
 	NVid = trtbl[0].item-1;
 	vidfile << vpathbase.c_str() <<  "Video" << NVid << ".divx";
-	VidLoad(vidfile.str().c_str());
+	if (trtbl[0].trialType != 0)
+		VidLoad(vidfile.str().c_str());
 	/*
 	Vid = new Video(vidfile.str().c_str(),SCREEN_WIDTH/2,SCREEN_HEIGHT/2,VIDEO_WIDTH,VIDEO_HEIGHT,&errcode);
 	if (errcode != 0)
@@ -942,9 +951,11 @@ void clean_up()
 	delete returntext;
 	delete mousetext;
 
-	Vid->CleanUp();
-	delete Vid;
-
+	if (trtbl[0].trialType != 0)
+	{
+		Vid->CleanUp();
+		delete Vid;
+	}
 	//std::cerr << "Deleted all objects." << std::endl;
 
 	SDL_GL_DeleteContext(glcontext);
@@ -1002,7 +1013,8 @@ static void draw_screen()
 
 	player->Draw();
 
-	Vid->Update();
+	if ((CurTrial <= 0 && trtbl[0].trialType != 0) || (CurTrial > 0 && curtr.trialType != 0))
+		Vid->Update();
 
 	// Draw text
 	endtext->Draw(float(PHYSICAL_WIDTH)/2.0f,float(PHYSICAL_HEIGHT)*2.0f/3.0f);
@@ -1093,7 +1105,7 @@ void game_update()
 			for (int a = 0; a < NINSTRUCT; a++)
 				instructimages[b][a]->Off();
 		
-		if (Vid->VisibleState() != 0)
+		if (trtbl[0].trialType != 0 && Vid->VisibleState() != 0)
 			Vid->Invisible();
 
 		if( returntostart && nextstateflag)  //hand is in the home position and the experimenter asked to advance the experiment
@@ -1118,8 +1130,11 @@ void game_update()
 
 		//display instructions
 		//std::cerr << " Instruction " << trtbl[0].practice*6+trtbl[0].trialType << std::endl;
-		instructimages[trtbl[0].practice][trtbl[0].trialType-1]->On();
-		Target.instruct = trtbl[0].practice*NINSTRUCT + trtbl[0].trialType;
+		if (trtbl[0].trialType != 0)
+		{
+			instructimages[trtbl[0].practice][trtbl[0].trialType-1]->On();
+			Target.instruct = trtbl[0].practice*NINSTRUCT + trtbl[0].trialType;
+		}
 
 		// If experimenter hits advance button, move on (after delay to make sure not triggered from previous keypress)
 		if (hoverTimer->Elapsed() > 1000 && nextstateflag)
@@ -1129,12 +1144,14 @@ void game_update()
 			redotrialflag = false;
 			skiptrialflag = false;
 
-			instructimages[trtbl[0].practice][trtbl[0].trialType-1]->Off();
+			if (trtbl[0].trialType != 0)
+			{
+				instructimages[trtbl[0].practice][trtbl[0].trialType-1]->Off();
 
-			//make sure that all the videos have stopped playing and are invisible
-			Vid->Stop();
-			Vid->ResetVid();
-
+				//make sure that all the videos have stopped playing and are invisible
+				Vid->Stop();
+				Vid->ResetVid();
+			}
 
 			falsestart = false;
 			mvtStarted = false;
@@ -1216,18 +1233,21 @@ void game_update()
 				Target.key = ' ';
 			}
 			
-			if (NVid == curtr.item-1 && Vid->IsValid())
+			if (curtr.trialType != 0 && NVid == curtr.item-1 && Vid->IsValid())
 			{
 				//video is already loaded successfully, do nothing
 				std::cerr << "Video " << NVid << " already loaded." << std::endl;
 			}
 			else
 			{
-				std::stringstream vidfile;
-				vidfile.str(std::string());
-				NVid = curtr.item-1;
-				vidfile << vpathbase.c_str() <<  "Video" << NVid << ".divx";
-				VidLoad(vidfile.str().c_str());
+				if (curtr.trialType != 0)
+				{
+					std::stringstream vidfile;
+					vidfile.str(std::string());
+					NVid = curtr.item-1;
+					vidfile << vpathbase.c_str() <<  "Video" << NVid << ".divx";
+					VidLoad(vidfile.str().c_str());
+				}
 			}
 
 			Target.vidstatus = 0;
@@ -1301,6 +1321,7 @@ void game_update()
 
 					nextstateflag = false;
 
+					recordData = true;
 					state = Active;
 
 				}
@@ -1559,8 +1580,11 @@ void game_update()
 		//if trial duration is exceeded, display a "stop" signal but do not change state until experimenter prompts
 		if (!nextstateflag && ((curtr.trdur > 0 && trialTimer->Elapsed() > curtr.trdur) || (trialTimer->Elapsed() > MAX_TRIAL_DURATION) ))
 		{
-			Vid->Stop();
-			Vid->Invisible();
+			if (curtr.trialType != 0)
+			{
+				Vid->Stop();
+				Vid->Invisible();
+			}
 			Target.vidstatus = 0;
 			stoptext->On();
 		}
@@ -1580,10 +1604,12 @@ void game_update()
 			if ((curtr.showcontext > 0) && (curtr.context-1 < NcontextTexts))
 				contextText[curtr.context-1]->Off();
 
-			Vid->Pause();
-			Vid->ResetVid();
-			Target.vidstatus = 0;
-
+			if (curtr.trialType != 0)
+			{
+				Vid->Pause();
+				Vid->ResetVid();
+				Target.vidstatus = 0;
+			}
 			returntostart = false;
 
 			stoptext->Off();
@@ -1619,9 +1645,11 @@ void game_update()
 			returntext->Off();
 				
 			//make sure that all the videos have stopped playing and are reset (reset also makes them invisible)
-			Vid->Stop();
-			Vid->ResetVid();
-
+			if (curtr.trialType != 0)
+			{
+				Vid->Stop();
+				Vid->ResetVid();
+			}
 
 			nextstateflag = false;
 			std::cerr << "Ending Trial." << std::endl;
