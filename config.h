@@ -9,13 +9,13 @@
 //set this to the data path in which the current set of data for this block should be stored.
 
 //set the subject number
-#define SUBJECT_ID "2"
+#define SUBJECT_ID "9999"
 
 //define the file that contains the name of the trial table
-#define TRIALFILE "./TrialTables/freestream.txt"  
+#define TRIALFILE "./TrialTables/12_Freestream.txt"  
 
 //define the folder where the data will go (this folder must exist!)
-#define DATAPATH "C:/Users/MRRI/Desktop/imitation_data/"
+#define DATAPATH "C:/Users/MRRI/Desktop/imitation_data/test/"
 //#define DATAPATH ""
 
 //define paths
