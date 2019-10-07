@@ -855,7 +855,7 @@ bool init()
 
 	readytext = Image::ImageText(readytext, "Get ready...","arial.ttf", 28, textColor);
 	readytext->Off();
-	stoptext = Image::ImageText(stoptext, "STOP!","arial.ttf", 32, textColor);
+	stoptext = Image::ImageText(stoptext, "STOP!","arial.ttf", 30, textColor);
 	stoptext->Off();
 	holdtext = Image::ImageText(holdtext, "Wait until the go signal!","arial.ttf", 28, textColor);
 	holdtext->Off();

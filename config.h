@@ -80,8 +80,8 @@
 
 //screen dimensions
 //   (note, the Elitebook wants dimensions that are slightly larger than the screen, with WINDOWED set to true!)
-#define SCREEN_WIDTH  1602
-#define SCREEN_HEIGHT  901
+#define SCREEN_WIDTH  1920
+#define SCREEN_HEIGHT  1080
 //#define SCREEN_WIDTH  1440
 //#define SCREEN_HEIGHT  900
 
@@ -97,8 +97,8 @@
 
 
 // Physical dimensions of the screen in meters
-#define PHYSICAL_WIDTH  0.307
-#define PHYSICAL_HEIGHT  0.173
+#define PHYSICAL_WIDTH  0.478
+#define PHYSICAL_HEIGHT  0.27
 //#define PHYSICAL_HEIGHT  0.192
 
 // screen ratio, in meters per pixel
