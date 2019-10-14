@@ -481,9 +481,17 @@ int TrackBird::GetUpdatedSample(TrackSYSCONFIG *sysconfig, TrackDATAFRAME DataBi
 				 *  
 				 *  We then subtract off the offset.
 				 */
-				DataBirdFrame[j].x = (DataBirdFrame[j].x)/1000;
-				DataBirdFrame[j].y = (DataBirdFrame[j].y)/1000; 
-				DataBirdFrame[j].z = (DataBirdFrame[j].z)/1000;
+
+				//uncomment the if statement below to properly handle the request to use inches instead of meters. however, this wasn't
+				// done in the original code so we will keep using inches/1000 going forward, and just correct this error in the analysis
+				// code. it also requires that we modify the dimensions in the config.h script appropriately. we will set the precision higher
+				// in the data output file to compensate.
+				//if (DOMETRIC)
+				//{
+					DataBirdFrame[j].x = (DataBirdFrame[j].x) / 1000.0;
+					DataBirdFrame[j].y = (DataBirdFrame[j].y) / 1000.0;
+					DataBirdFrame[j].z = (DataBirdFrame[j].z) / 1000.0;
+				//}
 
 				//rotate axes to align display and system
 				double tmpx, tmpy;

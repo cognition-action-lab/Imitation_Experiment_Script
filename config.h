@@ -9,13 +9,13 @@
 //set this to the data path in which the current set of data for this block should be stored.
 
 //set the subject number
-#define SUBJECT_ID "CS184"
+#define SUBJECT_ID "test"
 
 //define the file that contains the name of the trial table
 #define TRIALFILE "./TrialTables/11_Static_Mful.txt"  
 
 //define the folder where the data will go (this folder must exist!)
-#define DATAPATH "C:/Users/MRRI/Desktop/imitation_data/test/"
+#define DATAPATH "./imitation_data/"
 //#define DATAPATH ""
 
 //define paths
@@ -76,7 +76,7 @@
 #define RANGE 72.0f
 #define DOSYNC true
 #define DOMETRIC false
-
+//note, when DOMETRIC is set to false, we actually end up in inches/1000 instead of inches...  so the dimensions below must compensate.
 
 //screen dimensions
 //   (note, the Elitebook wants dimensions that are slightly larger than the screen, with WINDOWED set to true!)
@@ -96,12 +96,12 @@
 #define VIDEO_HEIGHT 864
 
 
-// Physical dimensions of the screen in meters
-#define PHYSICAL_WIDTH  0.478
-#define PHYSICAL_HEIGHT  0.27
+// Physical dimensions of the screen
+#define PHYSICAL_WIDTH  (0.478f/0.0254f/1000.0f)
+#define PHYSICAL_HEIGHT  (0.27f/0.0254f/1000.0f)
 //#define PHYSICAL_HEIGHT  0.192
 
-// screen ratio, in meters per pixel
+// screen ratio, in physical_distance per pixel
 #define PHYSICAL_RATIO  (PHYSICAL_WIDTH / SCREEN_WIDTH)
 //#define PHYSICAL_RATIOI  (SCREEN_WIDTH/PHYSICAL_WIDTH)
 
@@ -110,8 +110,9 @@
 #define WINDOWED  true
 #define MIRRORED  false
 
-#define CURSOR_RADIUS 0.006f
-#define START_RADIUS 0.05f
+//set the cursor and start dimensions, in the correct units
+#define CURSOR_RADIUS (0.006f/0.0254f/1000.0f)
+#define START_RADIUS (0.05f/0.0254f/1000.0f)
 
 //define pi as a float
 #define PI 3.14159265358979f
@@ -124,7 +125,7 @@
 #define CALphiROTANG 0.0f  //radians
 
 //define the velocity threshold for detecting movement onset/offset, in m/sec
-#define VEL_MVT_TH 0.05f
+#define VEL_MVT_TH (0.05f/0.0254f/1000.0f)
 //define the time that vel must be below thresh to define movement end, in msec
 #define VEL_END_TIME 2000 //hold still for 2 sec
 

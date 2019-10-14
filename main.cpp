@@ -1160,6 +1160,10 @@ void game_update()
 
 			Target.key = ' ';
 
+			std::stringstream texttn;
+			texttn << 0 << "_" << 0;  //CurTrial starts from 0, so we add 1 for convention.
+			trialnum = Image::ImageText(trialnum, texttn.str().c_str(), "arial.ttf", 12, textColor);
+
 			hoverTimer->Reset();
 			returntext->Off();
 
@@ -1172,7 +1176,7 @@ void game_update()
 	case WaitStim:
 		//this state is just a "pause" state between trials.
 		
-		trialnum->Off();  //is it confusing that we show the "last" trial here, since we don't know if we want to redo or advance yet?
+		//trialnum->Off();  //is it confusing that we show the "last" trial here, since we don't know if we want to redo or advance yet?
 
 		returntext->Off();
 		Target.item = -1;
@@ -1204,11 +1208,33 @@ void game_update()
 		else
 			redotext->On();
 		
+		if (hoverTimer->Elapsed() > 1000 && (skiptrialflag))
+		{
+			nextstateflag = false;
+			redotrialflag = false;
+			skiptrialflag = false;
+			falsestart = false;
+			numredos = 0;
+			CurTrial++;  //we started the experiment with CurTrial = -1, so now we are on the "next" trial (or first trial)
+			Target.trial = CurTrial + 1;
+			Target.redo = 0;
+			Target.context = curtr.context;
+			Target.item = curtr.item;
+			Target.key = ' ';
 
-		if (hoverTimer->Elapsed() > 1000 && (nextstateflag || redotrialflag || skiptrialflag) )
+			std::stringstream texttn;
+			texttn << CurTrial + 1 << "_" << numredos;  //CurTrial starts from 0, so we add 1 for convention.
+			trialnum = Image::ImageText(trialnum, texttn.str().c_str(), "arial.ttf", 12, textColor);
+			std::cerr << "Trial " << CurTrial << " skipped." << std::endl;
+
+			hoverTimer->Reset();
+		}
+
+
+		if (hoverTimer->Elapsed() > 1000 && (nextstateflag || redotrialflag) )
 		{
 			
-			if (skiptrialflag || (!falsestart && (nextstateflag || (redotrialflag && CurTrial < 0) ))) //if accidentally hit "r" before the first trial, ignore this error!  //if false start but want to just move on, can use skip trial option
+			if ((!falsestart && (nextstateflag || (redotrialflag && CurTrial < 0) ))) //if accidentally hit "r" before the first trial, ignore this error!  //if false start but want to just move on, can use skip trial option
 			{
 				nextstateflag = false;
 				redotrialflag = false;
@@ -1366,7 +1392,7 @@ void game_update()
 		{	//detected movement too early; 
 			//std::cerr << "Player: " << player->GetX() << " , " << player->GetY() << " , " << player->GetZ() << std::endl;
 			//std::cerr << "Circle: " << startCircle->GetX() << " , " << startCircle->GetY() << " , " << startCircle->GetZ() << std::endl;
-			//std::cerr << "Distance: " << player->Distance(startCircle) << std::endl;
+			//std::cerr << "MvmtBreak: Distance: " << player->Distance(startCircle) << std::endl;
 			mvtStarted = true;
 			//items[curtr.context-1]->Off();
 			if ((curtr.showcontext > 0) && (curtr.context-1 < NcontextTexts))
@@ -1465,7 +1491,7 @@ void game_update()
 			hoverTimer->Reset();
 		}
 
-		if (mvtStarted && !falsestart && (hoverTimer->Elapsed() > 1000) )  //moved too soon!
+		if (mvtStarted && !falsestart && (hoverTimer->Elapsed() > 500) )  //moved too soon!
 		{
 			//state = WaitStim;
 			if ((curtr.showcontext > 0) && (curtr.context-1 < NcontextTexts))
