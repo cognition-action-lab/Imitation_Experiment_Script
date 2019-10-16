@@ -9,7 +9,7 @@
 //set this to the data path in which the current set of data for this block should be stored.
 
 //set the subject number
-#define SUBJECT_ID "CS184"
+#define SUBJECT_ID "CS257"
 
 //define the file that contains the name of the trial table
 #define TRIALFILE "./TrialTables/11_Static_Mful.txt"  

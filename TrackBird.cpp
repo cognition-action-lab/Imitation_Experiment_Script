@@ -481,6 +481,8 @@ int TrackBird::GetUpdatedSample(TrackSYSCONFIG *sysconfig, TrackDATAFRAME DataBi
 				 *  
 				 *  We then subtract off the offset.
 				 */
+
+				//note we shouldn't do this if not in metric mode, but we are... so we will compensate in the analysis code
 				DataBirdFrame[j].x = (DataBirdFrame[j].x)/1000;
 				DataBirdFrame[j].y = (DataBirdFrame[j].y)/1000; 
 				DataBirdFrame[j].z = (DataBirdFrame[j].z)/1000;
