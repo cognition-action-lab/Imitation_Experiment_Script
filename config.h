@@ -96,9 +96,9 @@
 #define VIDEO_HEIGHT 864
 
 
-// Physical dimensions of the screen in meters
-#define PHYSICAL_WIDTH  0.307
-#define PHYSICAL_HEIGHT  0.173
+// Physical dimensions of the screen in kilo-inches (code is requesting inches, not meters, but there is a scale error in TrackBird)
+#define PHYSICAL_WIDTH  (0.307f/0.0254f/1000.0f)
+#define PHYSICAL_HEIGHT  (0.173f/0.0254f/1000.0f)
 //#define PHYSICAL_HEIGHT  0.192
 
 // screen ratio, in meters per pixel
@@ -110,8 +110,9 @@
 #define WINDOWED  true
 #define MIRRORED  false
 
-#define CURSOR_RADIUS 0.006f
-#define START_RADIUS 0.05f
+//converted to kilo-inches
+#define CURSOR_RADIUS (0.006f/0.0254f/1000.0f)
+#define START_RADIUS (0.05f/0.0254f/1000.0f)
 
 //define pi as a float
 #define PI 3.14159265358979f
@@ -123,8 +124,8 @@
 #define CALthetaROTANG 0.0f  //radians
 #define CALphiROTANG 0.0f  //radians
 
-//define the velocity threshold for detecting movement onset/offset, in m/sec
-#define VEL_MVT_TH 0.05f
+//define the velocity threshold for detecting movement onset/offset, in kiloinches/sec
+#define VEL_MVT_TH (0.05f/0.0254f/1000.0f)
 //define the time that vel must be below thresh to define movement end, in msec
 #define VEL_END_TIME 2000 //hold still for 2 sec
 
